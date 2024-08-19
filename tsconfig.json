@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "sourceMap": true,
+    "moduleResolution": "NodeNext",
+    "outDir": "./dist",
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "lib": ["esnext", "ES2021.String"],
+    "skipLibCheck": true,
+    "esModuleInterop": true
+  },
+  "include": ["./src/", "types/*"]
+}

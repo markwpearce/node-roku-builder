@@ -1,0 +1,23 @@
+{
+  "name": "roku-builder",
+  "version": "1.0.2",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "types/types.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.3.0"
+  },
+  "dependencies": {
+    "gm": "^1.25.0",
+    "glob": "^11.0.0",
+    "json5": "^2.2.3",
+    "omggif": "^1.0.10"
+  }
+}
