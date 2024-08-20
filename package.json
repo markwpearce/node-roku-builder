@@ -4,13 +4,13 @@
   "description": "",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jean-guyrivard/node-roku-builder"
+    "url": "git+https://github.com/jean-guyrivard/node-roku-builder.git"
   },
   "main": "dist/index.js",
   "types": "types/types.d.ts",
   "type": "module",
   "scripts": {
-    "prepublish": "npm run build",
+    "prepack": "npm run build",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
