@@ -219,8 +219,6 @@ async function buildBrand(requestedBrand: string, configData: any, options: Opti
 function processBrand(currentBrand: Dictionary<any>, brandConfigs: Dictionary<any>): Dictionary<any> {
   let currentConfig: Dictionary<any> = {};
 
-  console.log(JSON.stringify(["processBrand", currentBrand]))
-
   if (currentBrand.parents) {
     currentBrand.parents.forEach((parentBrand: string) => {
       let resolvedBrand: string = parentBrand;
