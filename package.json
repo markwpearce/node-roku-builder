@@ -1,7 +1,11 @@
 {
   "name": "roku-builder",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jean-guyrivard/node-roku-builder"
+  },
   "main": "dist/index.js",
   "types": "types/types.d.ts",
   "type": "module",

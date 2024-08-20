@@ -43,7 +43,7 @@ async function doBuild(options: Options): Promise<void> {
       return;
     }
 
-    console.log(JSON.stringify(["Config loaded", options.source, configData]));
+    console.log(JSON.stringify(["Config loaded"]));
 
     if (options.brand) {
       console.log(`Brand ${options.brand} requested`);
