@@ -137,11 +137,15 @@ async function buildBrand(requestedBrand: string, configData: any, options: Opti
           brandConfigs[key] = value;
           brandConfigs[key]["!files"] = [];
 
-          let matches = glob.sync(path.join(options.source, "brands", key, "{" + targets.join(",") + "}{/**/*,*}"), { nodir: true })
+          let brandFolder = key;
+          if (brandConfigs[key]["!variables"]) {
+            brandFolder = replaceVariables(brandConfigs[key]["manifest"]["brand"], brandConfigs[key]["!variables"]);
+          }
+          let matches = glob.sync(path.join(options.source, "brands", brandFolder, "{" + targets.join(",") + "}{/**/*,*}"), { nodir: true });
           matches.forEach((value) => {
-            let fileInfo: rokuBuilderFileInfo = {
+            let fileInfo = {
               absoluteFilePath: value,
-              relativeFilePath: path.relative(path.join(options.source, "brands", key), value)
+              relativeFilePath: path.relative(path.join(options.source, "brands", brandFolder), value)
             };
 
             brandConfigs[key]["!files"].push(fileInfo);
@@ -182,11 +186,16 @@ async function buildBrand(requestedBrand: string, configData: any, options: Opti
               brandConfigs[brand]["!variables"] = variables;
               brandConfigs[brand]["!files"] = [];
 
-              const matches = glob.sync(path.join(options.source, "brands", brand, "{" + targets.join(",") + "}{/**/*,*}"), { nodir: true })
+              let brandFolder = brand;
+              if (brandConfigs[brand]["!variables"]) {
+                brandFolder = replaceVariables(brandConfigs[brand]["manifest"]["brand"], brandConfigs[brand]["!variables"]);
+              }
+
+              const matches = glob.sync(path.join(options.source, "brands", brandFolder, "{" + targets.join(",") + "}{/**/*,*}"), { nodir: true });
               matches.forEach((value) => {
                 let fileInfo: rokuBuilderFileInfo = {
                   absoluteFilePath: value,
-                  relativeFilePath: path.relative(path.join(options.source, "brands", brand), value)
+                  relativeFilePath: path.relative(path.join(options.source, "brands", brandFolder), value)
                 };
 
                 brandConfigs[brand]["!files"].push(fileInfo);
