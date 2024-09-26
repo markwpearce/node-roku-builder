@@ -151,7 +151,7 @@ async function buildBrand(requestedBrand: string, configData: any, options: Opti
             brandConfigs[key]["!files"].push(fileInfo);
           })
 
-          brandConfigs[key]["!config"] = parseConfig(key, options);
+          brandConfigs[key]["!config"] = parseConfig(brandFolder, options);
         }
       });
 
@@ -201,7 +201,7 @@ async function buildBrand(requestedBrand: string, configData: any, options: Opti
                 brandConfigs[brand]["!files"].push(fileInfo);
               })
 
-              brandConfigs[brand]["!config"] = parseConfig(brand, options);
+              brandConfigs[brand]["!config"] = parseConfig(brandFolder, options);
             })
           })
 
