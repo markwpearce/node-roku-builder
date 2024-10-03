@@ -4,6 +4,7 @@ import * as glob from 'glob';
 import JSON5 from 'json5'
 import * as omggif from 'omggif';
 import gm from 'gm';
+import deepExtend from 'deep-extend';
 
 const im = gm.subClass({ imageMagick: '7+' });
 
@@ -210,7 +211,6 @@ async function buildBrand(requestedBrand: string, configData: any, options: Opti
 
             await finalizeBuild(finalConfig, options);
 
-
             console.log("Config completed");
           } else {
             console.log(`Requested brand ${requestedBrand} not found`);
@@ -306,10 +306,7 @@ function processBrand(currentBrand: Dictionary<any>, brandConfigs: Dictionary<an
     if (!currentConfig["!config"]) {
       currentConfig["!config"] = {}
     }
-
-    Object.entries(currentBrand["!config"]).forEach(([key, value]) => {
-      currentConfig["!config"][key] = value;
-    });
+    deepExtend(currentConfig["!config"], currentBrand["!config"])
   }
 
   console.log("Process Brand completed");
@@ -432,9 +429,20 @@ async function finalizeBuild(finalConfig: Dictionary<any>, options: Options) {
   fs.writeFileSync(path.join(options.target, "manifest"), manifest)
 
   if (configData["resolutions"]) {
+    let coreConfig: Dictionary<any> = {}
+
+    if (finalConfig["!config"]["core"] != undefined) {
+      coreConfig = finalConfig["!config"]["core"];
+    }
+
     configData["resolutions"].forEach((resolution: string) => {
       Object.entries(finalConfig["!config"]).forEach(([region, regionValue]) => {
-        const createdConfig = createConfig(<Dictionary<any>>regionValue, resolution)
+        if (region == "core")
+          return;
+        let createdConfig: Dictionary<any> = {}
+        deepExtend(createdConfig, createConfig(coreConfig, resolution))
+        deepExtend(createdConfig, createConfig(<Dictionary<any>>regionValue, resolution))
+
         const filePath = path.join(options.target, "region", region)
 
         fs.mkdirSync(filePath, {recursive: true});
@@ -444,8 +452,17 @@ async function finalizeBuild(finalConfig: Dictionary<any>, options: Options) {
       })
     })
   } else {
+    let coreConfig: Dictionary<any> = {}
+
+    if (finalConfig["!config"]["core"] != undefined) {
+      coreConfig = finalConfig["!config"]["core"];
+    }
+
     Object.entries(finalConfig["!config"]).forEach(([region, regionValue]) => {
-      const createdConfig = createConfig(<Dictionary<any>>regionValue, "fhd")
+      let createdConfig: Dictionary<any> = {}
+      deepExtend(createdConfig, createConfig(coreConfig, "fhd"))
+      deepExtend(createdConfig, createConfig(<Dictionary<any>>regionValue, "fhd"))
+
       const filePath = path.join(options.target, "region", region)
 
       fs.mkdirSync(filePath, {recursive: true});
@@ -530,10 +547,7 @@ function parseConfig(brand: string, options: Options): Dictionary<any> {
         }
 
         const componentConfig = JSON5.parse(fs.readFileSync(regionConfigPath).toString());
-
-        Object.entries(componentConfig).forEach(([componentKey, componentValue]) => {
-          config[region]["components"][basePathParts][componentKey] = componentValue
-        })
+        deepExtend(config[region]["components"][basePathParts], componentConfig)
       })
     }
   })
