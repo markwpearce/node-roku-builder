@@ -4,7 +4,7 @@ import * as glob from 'glob';
 import JSON5 from 'json5'
 import * as omggif from 'omggif';
 import gm from 'gm';
-import deepExtend from 'deep-extend';
+import { mergician } from 'mergician';
 
 const im = gm.subClass({ imageMagick: '7+' });
 
@@ -235,13 +235,7 @@ function processBrand(currentBrand: Dictionary<any>, brandConfigs: Dictionary<an
         resolvedBrand = replaceVariables(parentBrand, currentBrand["!variables"])
       }
       const parentConfig: Dictionary<any> = processBrand(brandConfigs[resolvedBrand], brandConfigs);
-      Object.entries(parentConfig).forEach(([key, value]) => {
-        if (currentConfig[key] != undefined) {
-          currentConfig[key] = Object.assign(currentConfig[key], value)
-        } else {
-          currentConfig[key] = value
-        }
-      })
+      currentConfig = mergician({appendArrays: true})(currentConfig, parentConfig)
     })
   }
 
@@ -296,17 +290,14 @@ function processBrand(currentBrand: Dictionary<any>, brandConfigs: Dictionary<an
       currentConfig["!files"] = []
     }
 
-    Object.entries(currentBrand["!files"]).forEach(([key, value]) => {
-      value as rokuBuilderFileInfo
-      currentConfig["!files"].push(value);
-    });
+    currentConfig["!files"] = currentConfig["!files"].concat(currentBrand["!files"])
   }
 
   if (currentBrand["!config"]) {
     if (!currentConfig["!config"]) {
       currentConfig["!config"] = {}
     }
-    deepExtend(currentConfig["!config"], currentBrand["!config"])
+    currentConfig["!config"] = mergician({appendArrays: true})(currentConfig["!config"], currentBrand["!config"])
   }
 
   console.log("Process Brand completed");
@@ -440,8 +431,8 @@ async function finalizeBuild(finalConfig: Dictionary<any>, options: Options) {
         if (region == "core")
           return;
         let createdConfig: Dictionary<any> = {}
-        deepExtend(createdConfig, createConfig(coreConfig, resolution))
-        deepExtend(createdConfig, createConfig(<Dictionary<any>>regionValue, resolution))
+        createdConfig = mergician({appendArrays: true})(createdConfig, createConfig(coreConfig, resolution))
+        createdConfig = mergician({appendArrays: true})(createdConfig, createConfig(<Dictionary<any>>regionValue, resolution))
 
         const filePath = path.join(options.target, "region", region)
 
@@ -460,8 +451,8 @@ async function finalizeBuild(finalConfig: Dictionary<any>, options: Options) {
 
     Object.entries(finalConfig["!config"]).forEach(([region, regionValue]) => {
       let createdConfig: Dictionary<any> = {}
-      deepExtend(createdConfig, createConfig(coreConfig, "fhd"))
-      deepExtend(createdConfig, createConfig(<Dictionary<any>>regionValue, "fhd"))
+      createdConfig = mergician({appendArrays: true})(createdConfig, createConfig(coreConfig, "fhd"))
+      createdConfig = mergician({appendArrays: true})(createdConfig, createConfig(<Dictionary<any>>regionValue, "fhd"))
 
       const filePath = path.join(options.target, "region", region)
 
@@ -547,7 +538,7 @@ function parseConfig(brand: string, options: Options): Dictionary<any> {
         }
 
         const componentConfig = JSON5.parse(fs.readFileSync(regionConfigPath).toString());
-        deepExtend(config[region]["components"][basePathParts], componentConfig)
+        config[region]["components"][basePathParts] = mergician({appendArrays: true})(config[region]["components"][basePathParts], componentConfig)
       })
     }
   })

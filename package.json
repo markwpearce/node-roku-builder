@@ -20,10 +20,10 @@
     "@types/node": "^22.3.0"
   },
   "dependencies": {
-    "deep-extend": "^0.6.0",
     "glob": "^11.0.0",
     "gm": "^1.25.0",
     "json5": "^2.2.3",
+    "mergician": "^2.0.2",
     "omggif": "^1.0.10"
   }
 }
