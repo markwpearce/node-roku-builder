@@ -1,0 +1,11 @@
+[*.json]
+indent_style = space
+indent_size = 2
+
+[*.brs]
+indent_style = space
+indent_size = 2
+
+[*.bs]
+indent_style = space
+indent_size = 2
