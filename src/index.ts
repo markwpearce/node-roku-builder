@@ -274,7 +274,7 @@ async function buildBrand(requestedBrand: string, configData: any, options: Opti
   }
   let finalConfig = processBrand(requestedBrand, brandConfigs);
   await finalizeBuild(finalConfig, options);
-  logger.log("Config completed");
+  logger.log("Build complete");
 }
 
 
@@ -291,7 +291,7 @@ function processBrand(currentBrandName: string, brandConfigs: Dictionary<any>): 
     return;
   }
   let currentConfig: Dictionary<any> = {};
-  logger.debug(`Processing Brand "${currentBrandName}" ...`);
+  logger.log(`Processing Brand "${currentBrandName}" ...`);
 
   if (currentBrand.parents) {
     currentBrand.parents.forEach((parentBrand: string) => {
@@ -365,7 +365,7 @@ function processBrand(currentBrandName: string, brandConfigs: Dictionary<any>): 
     currentConfig["!config"] = mergician({ appendArrays: true })(currentConfig["!config"], currentBrand["!config"])
   }
 
-  logger.debug(`Process Brand "${currentBrandName}" completed`);
+  logger.log(`Process Brand "${currentBrandName}" completed`);
 
   return currentConfig;
 }
@@ -412,6 +412,7 @@ function writeAnimations(finalConfig: FinalConfig, options: Options) {
       fs.writeFileSync(animFile, JSON.stringify(value))
     })
   }
+  logger.debug('Animations written')
 }
 
 /**
@@ -438,6 +439,7 @@ function writeManifest(finalConfig: FinalConfig, options: Options) {
   })
   manifest += "\n"
   fs.writeFileSync(path.join(options.target, "manifest"), manifest)
+  logger.debug('Manifest written')
 }
 
 /**
@@ -490,6 +492,7 @@ function writeConfig(finalConfig: FinalConfig, options: Options) {
       })
     })
   }
+  logger.debug('Config written')
 }
 
 async function processFile(sourceFile: RokuBuilderFileInfo, finalConfig: FinalConfig, replacements: Dictionary<string>, options: Options) {
@@ -557,7 +560,7 @@ async function processFile(sourceFile: RokuBuilderFileInfo, finalConfig: FinalCo
 
 async function finalizeBuild(finalConfig: FinalConfig, options: Options) {
   let replacements = getReplacements(finalConfig, options);
-
+  logger.log('Finalizing Build...')
   if (fs.existsSync(options.target)) {
     fs.rmSync(options.target, { recursive: true })
   }
