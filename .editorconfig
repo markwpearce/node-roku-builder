@@ -2,10 +2,6 @@
 indent_style = space
 indent_size = 2
 
-[*.brs]
-indent_style = space
-indent_size = 2
-
-[*.bs]
+[*.ts]
 indent_style = space
 indent_size = 2
