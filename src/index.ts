@@ -18,6 +18,11 @@ export interface RokuBuilderFileInfo {
   absoluteFilePath: string;
 }
 
+export interface RokuBuilderGlobInfo {
+  src: string;
+  dest: string;
+}
+
 export interface Options {
   source: string
   target: string
@@ -32,6 +37,7 @@ export interface FinalConfig {
   },
   replacements?: Dictionary<string>;
   '!files'?: RokuBuilderFileInfo[];
+  '!globs'?: RokuBuilderGlobInfo[];
   '!config'?: Dictionary<Dictionary<any>>;
   replacements_files?: string[];
   [key: string]: any;
@@ -181,14 +187,38 @@ function getBrandConfigs(options: Options): Dictionary<any> {
         const key = brandName;
 
         brandConfigs[key]["!files"] = [];
+        brandConfigs[key]["!globs"] = [];
         let targets = getTargets(brandConfig);
         let brandFolder = key;
         if (brandConfigs[key]["!variables"]) {
           brandFolder = replaceVariables(brandConfigs[key]["manifest"]["brand"], brandConfigs[key]["!variables"]);
         }
-        if (Array.isArray(targets) && targets.length > 0) {
-          const targetsGroup = (targets.length > 1 ? `{${targets.join(",")}}` : targets[0]) + `{/**/*,*}`;
 
+        const allFilesGlobSuffix = `{/**/*,*}`;
+
+        if (Array.isArray(targets) && targets.length > 0) {
+          // build globs
+          for (const target of targets) {
+            let globPath = path.join(options.source, "brands", brandFolder, target);
+
+            if (fs.existsSync(globPath)) {
+              const stats = fs.lstatSync(globPath);
+              if (stats.isFile()) {
+                brandConfigs[key]["!globs"].push({
+                  src: globPath,
+                  dest: path.join(target)
+                });
+              } else if (stats.isDirectory()) {
+                globPath = path.join(globPath, '/**/*.*')
+                brandConfigs[key]["!globs"].push({
+                  src: globPath,
+                  dest: path.join(target)
+                });
+              }
+              logger.debug(`Brand "${brandFolder}" glob path:`, globPath)
+            }
+          }
+          const targetsGroup = (targets.length > 1 ? `{${targets.join(",")}}` : targets[0]) + allFilesGlobSuffix;
           const filePath = path.join(options.source, "brands", brandFolder, targetsGroup);
           logger.debug(`Brand "${brandFolder}" file path:`, filePath)
           let matches = glob.sync(filePath, { nodir: true });
@@ -197,7 +227,6 @@ function getBrandConfigs(options: Options): Dictionary<any> {
               absoluteFilePath: value,
               relativeFilePath: path.relative(path.join(options.source, "brands", brandFolder), value)
             };
-
             brandConfigs[key]["!files"].push(fileInfo);
           })
         } else {
@@ -356,6 +385,14 @@ function processBrand(currentBrandName: string, brandConfigs: Dictionary<any>): 
     }
 
     currentConfig["!files"] = currentConfig["!files"].concat(currentBrand["!files"])
+  }
+
+  if (currentBrand["!globs"]) {
+    if (!currentConfig["!globs"]) {
+      currentConfig["!globs"] = []
+    }
+
+    currentConfig["!globs"] = currentConfig["!globs"].concat(currentBrand["!globs"])
   }
 
   if (currentBrand["!config"]) {
