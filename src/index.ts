@@ -184,7 +184,7 @@ function getBrandConfigs(options: Options): Dictionary<any> {
         let targets = getTargets(brandConfig);
         let brandFolder = key;
         if (brandConfigs[key]["!variables"]) {
-          brandFolder = replaceVariables(brandConfigs[key]["manifest"]["brand"], brandConfigs[key]["!variables"]);
+          brandFolder = replaceVariables(key, brandConfigs[key]["!variables"]);
         }
         if (Array.isArray(targets) && targets.length > 0) {
           const targetsGroup = (targets.length > 1 ? `{${targets.join(",")}}` : targets[0]) + `{/**/*,*}`;
@@ -218,8 +218,7 @@ function getBrandConfigs(options: Options): Dictionary<any> {
       if (configData.brands["!repeat_brands"]) {
         try {
           const topBrands = configData.brands["!repeat_brands"]["for"];
-
-          topBrands.forEach((currentTopBrand: string) => {
+          topBrands.forEach((currentTopBrand: string, replaceValueIndex: number) => {
             let variables: Dictionary<string> = {};
 
             variables["key"] = currentTopBrand;
@@ -227,7 +226,7 @@ function getBrandConfigs(options: Options): Dictionary<any> {
               let replaceVariables: Dictionary<any> = configData.brands["!repeat_brands"]["replace"];
 
               Object.entries(replaceVariables).forEach(([key, value]) => {
-                variables[key] = value[0]
+                variables[key] = value[replaceValueIndex]
               })
             }
 
@@ -339,7 +338,7 @@ function processBrand(currentBrandName: string, brandConfigs: Dictionary<any>): 
     }
 
     Object.entries(currentBrand["replacements"]).forEach(([key, value]) => {
-      currentConfig["replacements"][key] = value
+      currentConfig["replacements"][key] = replaceVariables(value as string, currentBrand["!variables"])
     })
   }
 
@@ -347,7 +346,10 @@ function processBrand(currentBrandName: string, brandConfigs: Dictionary<any>): 
     if (!currentConfig["replacements_files"]) {
       currentConfig["replacements_files"] = []
     }
-    currentConfig["replacements_files"] = currentConfig["replacements_files"].concat(currentBrand["replacements_files"])
+    const filesWithReplacedFilenames = currentBrand["replacements_files"].map((filePath: string) => {
+      return replaceVariables(filePath, currentBrand["!variables"])
+    })
+    currentConfig["replacements_files"] = currentConfig["replacements_files"].concat(filesWithReplacedFilenames)
   }
 
   if (currentBrand["!files"]) {
