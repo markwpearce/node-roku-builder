@@ -682,14 +682,17 @@ function parseConfig(brand: string, options: Options): Dictionary<any> {
         path.join(regionPath, "configs/{" + configSections.join(",") + "}/**/*"),
         { nodir: true, nocase: options.caseInsensitiveConfigSections === true }
       )
-      logger.log(`[parseConfig] region=${region} nocase=${options.caseInsensitiveConfigSections === true} matchCount=${configMatches.length}`);
-      const seenBasePathParts = new Set<string>();
       configMatches.forEach((regionConfigPath) => {
         const basePath = path.relative(path.join(regionPath, "configs"), regionConfigPath)
-        const basePathParts = path.dirname(basePath);
-        if (!seenBasePathParts.has(basePathParts)) {
-          seenBasePathParts.add(basePathParts);
-          logger.log(`[parseConfig] region=${region} basePathParts="${basePathParts}" from regionConfigPath="${regionConfigPath}"`);
+        // glob's nocase match preserves the matched entry's on-disk casing (verified: differs from
+        // the pattern's own casing on a case-sensitive filesystem), so normalize back to the
+        // channel_config_sections name itself rather than trust whatever casing came back.
+        let basePathParts = path.dirname(basePath);
+        if (options.caseInsensitiveConfigSections === true) {
+          const matchedSection = configSections.find((section: string) => section.toLowerCase() === basePathParts.toLowerCase());
+          if (matchedSection) {
+            basePathParts = matchedSection;
+          }
         }
 
         if (!config[region]["components"]) {
