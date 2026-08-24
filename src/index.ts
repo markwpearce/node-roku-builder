@@ -28,6 +28,14 @@ export interface Options {
   target: string
   brand: string
   logLevel?: LogLevel
+  /**
+   * When true, matches `channel_config_sections` against the on-disk `configs/` subfolder
+   * names case-insensitively. Off by default to preserve existing behavior - glob matching
+   * is case-sensitive, and folder casing that only "works" because it happens to match (or
+   * because the build runs on a case-insensitive filesystem like macOS/Windows) will silently
+   * drop mismatched sections on a case-sensitive filesystem (e.g. Linux CI).
+   */
+  caseInsensitiveConfigSections?: boolean
 }
 
 export interface FinalConfig {
@@ -676,7 +684,10 @@ function parseConfig(brand: string, options: Options): Dictionary<any> {
       config[region] = regionConfigData;
 
       const configSections = configData["channel_config_sections"] ?? [];
-      const configMatches = glob.sync(path.join(regionPath, "configs/{" + configSections.join(",") + "}/**/*"), { nodir: true })
+      const configMatches = glob.sync(
+        path.join(regionPath, "configs/{" + configSections.join(",") + "}/**/*"),
+        { nodir: true, nocase: options.caseInsensitiveConfigSections === true }
+      )
       configMatches.forEach((regionConfigPath) => {
         const basePath = path.relative(path.join(regionPath, "configs"), regionConfigPath)
         const basePathParts = path.dirname(basePath);
