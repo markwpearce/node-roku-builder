@@ -682,9 +682,15 @@ function parseConfig(brand: string, options: Options): Dictionary<any> {
         path.join(regionPath, "configs/{" + configSections.join(",") + "}/**/*"),
         { nodir: true, nocase: options.caseInsensitiveConfigSections === true }
       )
+      logger.log(`[parseConfig] region=${region} nocase=${options.caseInsensitiveConfigSections === true} matchCount=${configMatches.length}`);
+      const seenBasePathParts = new Set<string>();
       configMatches.forEach((regionConfigPath) => {
         const basePath = path.relative(path.join(regionPath, "configs"), regionConfigPath)
         const basePathParts = path.dirname(basePath);
+        if (!seenBasePathParts.has(basePathParts)) {
+          seenBasePathParts.add(basePathParts);
+          logger.log(`[parseConfig] region=${region} basePathParts="${basePathParts}" from regionConfigPath="${regionConfigPath}"`);
+        }
 
         if (!config[region]["components"]) {
           config[region]["components"] = {
