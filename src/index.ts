@@ -28,13 +28,7 @@ export interface Options {
   target: string
   brand: string
   logLevel?: LogLevel
-  /**
-   * When true, matches `channel_config_sections` against the on-disk `configs/` subfolder
-   * names case-insensitively. Off by default to preserve existing behavior - glob matching
-   * is case-sensitive, and folder casing that only "works" because it happens to match (or
-   * because the build runs on a case-insensitive filesystem like macOS/Windows) will silently
-   * drop mismatched sections on a case-sensitive filesystem (e.g. Linux CI).
-   */
+  /** Match channel_config_sections against configs/ subfolders case-insensitively (default false). */
   caseInsensitiveConfigSections?: boolean
 }
 
